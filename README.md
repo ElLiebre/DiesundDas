@@ -8,3 +8,6 @@ functions.misc.inc.php
 
 functions.dba.inc.php
 - ein tool zum Verwalten von Tabellen in einer MySQL Datenbank
+
+class.form.inc.php
+- eine Klasse um HTML Formulare zusammenzubauen
