@@ -21,6 +21,7 @@ requires: PHP 5.3 and up
 Changes 0.5 -> 0.6 (2014-07-09)
 Changes code formating to comply with php-fig.org's PSR
 Changed variable and method declaration to comply with PHP5's rules
+Changed strpos() to mb_strpos()
 
 Changes 0.4 -> 0.5 (6.1.2011)
 removed (in php 5.3) deprecated funtions split() and ereg()
@@ -205,7 +206,7 @@ class Form
         }
         $sH .= ' style="width:'.$iWidth.'px;">';
         foreach ($aOptions as $sOption) {
-            if (strpos($sOption, '|') !== false) {
+            if (mb_strpos($sOption, '|') !== false) {
                 $aOption = explode('|', $sOption);
                 if ($aOption[0] == $sSelected) {
                     $sSelectedtag = ' selected';
@@ -261,7 +262,7 @@ class Form
     // $bChecked = Is this checkbox checked?
     public function makeCheckbox($sName, $sValue, $bChecked = false, $sClass = '', $sEvents = '')
     {
-        if (strpos($sName, '|') !== false) {
+        if (mb_strpos($sName, '|') !== false) {
             $aName = explode('|', $sName);
             $sName = $aName[0];
             $sId = $aName[1];
