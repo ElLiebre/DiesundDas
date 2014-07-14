@@ -20,28 +20,28 @@ Planned Features:
 // ------------------ Usage ------------------ //
 * REQUIRES: functions.misc.inc.php
 * to use, call handleDBA($DBPDO, $CDBA);
-    - $DBPDO -> active MySQL PDO connection
-    - $CDBA -> configuration array:
+- $DBPDO -> active MySQL PDO connection
+- $CDBA -> configuration array:
 
 $CDBA = array(
     'db_name' => 'dbname',
     'db_table' => 'dbtable',
     'db_table_pkey' => 'prefix_id',
-//    'db_field_timestamp_add' => 'prefix_timestamp_add',
-//    'db_field_timestamp_edit' => 'prefix_timestamp_edit',
+    // 'db_field_timestamp_add' => 'prefix_timestamp_add',
+    // 'db_field_timestamp_edit' => 'prefix_timestamp_edit',
     'db_field_order' => 'prefix_date',
     'db_field_order_method' => 'DESC',
     'db_show_rowcount' => true,
-//    'db_show_addtime' => true,
-//    'db_show_edittime' => true,
+    // 'db_show_addtime' => true,
+    // 'db_show_edittime' => true,
 
     'form_submit_width' => 300,
     'show_navigation' => true,
     'allow_delete' => false, // muss noch implementiert werden!
 
     'img_upload_enabled' => false, // NUR JPEG Dateien!
-//    'img_upload_max_images' => 2,
-//    'img_upload_directory' => '/uploaddir/', // relative path
+    // 'img_upload_max_images' => 2,
+    // 'img_upload_directory' => '/uploaddir/', // relative path
 
     'search_enable' => true,
 
@@ -194,7 +194,7 @@ function handleDBA($DBDBA, $CDBA) {
                     $hQInsert = DBAprepareInsertQuery($CDBA, $DBDBA);
 
                     $hQInsert->execute();
-                    
+
                     $iId = $DBDBA->lastInsertId();
                     header('Location: '.$_SERVER["PHP_SELF"].'?action=edit&id='.$iId.'&justadded');
 
@@ -306,7 +306,7 @@ function DBAprepareUpdateQuery($CDBA, $DBDBA) {
     $sQ = buildPSUpdateQuery( $aData, $CDBA["db_table"], $CDBA["db_table_pkey"] );
     //echo $sQ."\n";
     //echo debug($aData, true);
-    
+
     $hResult = $DBDBA->prepare( $sQ );
     foreach ( $aData as $sKey => $sValue ) $hResult->bindValue( ':'.$sKey, $sValue );
 
@@ -356,19 +356,19 @@ function DBAgenerateForm($CDBA, $DBDBA, $sType, $aData = array()) {
         if ($aValue["formfieldtype"] == 'text') $sH .= $FORM->makeText($sKey, $sFieldvalue, $aValue["formfieldwidth"], $aValue["maxlength"], $bReadonly);
         if ($aValue["formfieldtype"] == 'textarea') $sH .= $FORM->makeTextarea($sKey, $sFieldvalue, $aValue["formfieldwidth"], $aValue["formfieldheight"], '', '', $bReadonly);
         if ($aValue["formfieldtype"] == 'select') {
-        	if (isset($aValue["relationreplace"]) && $aValue["relationreplace"]) {
-    			$sQ = "SELECT ".$aValue["relationreplace_id"].", ".$aValue["relationreplace_text"]." FROM ".$aValue["relationreplace_table"];
+            if (isset($aValue["relationreplace"]) && $aValue["relationreplace"]) {
+                $sQ = "SELECT ".$aValue["relationreplace_id"].", ".$aValue["relationreplace_text"]." FROM ".$aValue["relationreplace_table"];
                 $hResult = $DBDBA->query($sQ);
                 //echo debug($DBDBA->error());
                 $iRows = $DBDBA->numRows($hResult);
 
                 if ($iRows > 0) {
                     while ($aRow = $DBDBA->fetchArray($hResult)) {
-                    	$aRelationreplace[$aRow[$aValue["relationreplace_id"]]] = $aRow[$aValue["relationreplace_text"]];
-    				}
-    				$aValue["select_options"] = $aRelationreplace;
+                        $aRelationreplace[$aRow[$aValue["relationreplace_id"]]] = $aRow[$aValue["relationreplace_text"]];
+                    }
+                    $aValue["select_options"] = $aRelationreplace;
                 }
-        	}
+            }
             if ($bReadonly) $sH .= $FORM->makeText($sKey, $sFieldvalue, $aValue["formfieldwidth"], 0, $bReadonly);
             else $sH .= $FORM->makeSelect($sKey, $aValue["select_options"], $sFieldvalue, $aValue["formfieldwidth"]);
         }
@@ -393,8 +393,8 @@ function DBAgenerateForm($CDBA, $DBDBA, $sType, $aData = array()) {
 
         if (is_file ($_SERVER["DOCUMENT_ROOT"].$CDBA["img_upload_directory"].$_REQUEST["id"].'_'.$iBild.'.jpg') && getImageSize($_SERVER["DOCUMENT_ROOT"].$CDBA["img_upload_directory"].$_REQUEST["id"].'_'.$iBild.'.jpg')) {
 
-            $sBild .= '<img src="'.$CDBA["img_upload_directory"].$_REQUEST["id"].'_'.$iBild.'.jpg" alt="" /><br /><br />';
-            $iBild++;
+        $sBild .= '<img src="'.$CDBA["img_upload_directory"].$_REQUEST["id"].'_'.$iBild.'.jpg" alt="" /><br /><br />';
+        $iBild++;
 
         }
         */
