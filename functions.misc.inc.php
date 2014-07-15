@@ -1,6 +1,8 @@
 <?php
 
 /*
+2014-07-15
+- Changed code formating to comply with php-fig.org's PSR
 2014-07-14
 - added functionality for makeLinkHRefWithAddedGetVars() to parse the supplied url for getvars to use
 - added function is_blank, courtesy of FBOES
@@ -38,7 +40,8 @@ function is_blank (&$v)
     return !isset($v) || (is_scalar($v) ? (trim($v) === '') : empty($v));
 }
 
-function generateRandomString($length = 10) {
+function generateRandomString($length = 10)
+{
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $randomString = '';
     for ($i = 0; $i < $length; $i++) {
@@ -47,7 +50,8 @@ function generateRandomString($length = 10) {
     return $randomString;
 }
 
-function mail_utf8($to, $from_user, $from_email, $subject = '(No subject)', $message = '', $sType = 'text/html') {
+function mail_utf8($to, $from_user, $from_email, $subject = '(No subject)', $message = '', $sType = 'text/html')
+{
     $from_user = "=?UTF-8?B?".base64_encode($from_user)."?=";
     $subject = "=?UTF-8?B?".base64_encode($subject)."?=";
 
@@ -58,15 +62,19 @@ function mail_utf8($to, $from_user, $from_email, $subject = '(No subject)', $mes
     return mail($to, $subject, $message, $headers);
 }
 
-function T($sTextkey, $bReturnFalseIfNotAvailable = false) {
+function T($sTextkey, $bReturnFalseIfNotAvailable = false)
+{
     global $T, $sLang, $C;
     $sDefaultlang = key($C["lang_available"]);
     //debug($T[$sDefaultlang]);
     if (isset($_GET["showtextkeys"])) {
         $sH = '['.$sTextkey.']';
     } else {
-        if (isset($T[$sLang][$sTextkey]["tcl_text"]) && trim($T[$sLang][$sTextkey]["tcl_text"]) != '') $sH = trim($T[$sLang][$sTextkey]["tcl_text"]);
-        elseif (isset($T[$sDefaultlang][$sTextkey]["tcl_text"]) && trim($T[$sDefaultlang][$sTextkey]["tcl_text"]) != '') $sH = trim($T[$sDefaultlang][$sTextkey]["tcl_text"]);
+        if (isset($T[$sLang][$sTextkey]["tcl_text"]) && trim($T[$sLang][$sTextkey]["tcl_text"]) != '') {
+            $sH = trim($T[$sLang][$sTextkey]["tcl_text"]);
+        } elseif (isset($T[$sDefaultlang][$sTextkey]["tcl_text"]) && trim($T[$sDefaultlang][$sTextkey]["tcl_text"]) != '') {
+            $sH = trim($T[$sDefaultlang][$sTextkey]["tcl_text"]);
+        }
         if (!isset($sH) || $sH == '') {
             if ($bReturnFalseIfNotAvailable) return false;
             else $sH = 'Missing Text: '.$sTextkey;
@@ -76,14 +84,17 @@ function T($sTextkey, $bReturnFalseIfNotAvailable = false) {
     return $sH;
 }
 
-function loadTextcats() {
+function loadTextcats()
+{
     global $sLang, $C, $DB;
 
     $sQ = "SELECT * FROM textcat_base LEFT JOIN textcat_lang ON textcat_base.tc_id = textcat_lang.tcl_tcid && tcl_lang = :lang";
     $hResult = $DB->prepare($sQ);
     $hResult->bindValue(':lang', $sLang, PDO::PARAM_STR);
     $hResult->execute();
-    while ($aRow = $hResult->fetch()) $aTextcat[$sLang][$aRow["tc_key"]] = $aRow;
+    while ($aRow = $hResult->fetch()) {
+        $aTextcat[$sLang][$aRow["tc_key"]] = $aRow;
+    }
 
     $sDefaultlang = key($C["lang_available"]);
     if ($sLang != $sDefaultlang) {
@@ -93,10 +104,13 @@ function loadTextcats() {
         while ($aRow = $hResult->fetch()) $aTextcat[$sDefaultlang][$aRow["tc_key"]] = $aRow;
     }
 
-    if (isset($aTextcat)) return $aTextcat;
+    if (isset($aTextcat)) {
+        return $aTextcat;
+    }
 }
 
-function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGetVarsFromSuppliedHRef = false) {
+function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGetVarsFromSuppliedHRef = false)
+{
     if ($bUseGetVarsFromSuppliedHRef) {
         $aHRef = parse_url($sHRef);
         if(isset($aHRef["query"])) {
@@ -108,10 +122,18 @@ function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGet
             }
         }
         $sH = '';
-        if (isset($aHRef["scheme"])) $sH .= $aHRef["scheme"].'://';
-        if (isset($aHRef["host"])) $sH .= $aHRef["host"];
-        if (isset($aHRef["user"])) $sH .= $aHRef["user"];
-        if (isset($aHRef["path"])) $sH .= $aHRef["path"];
+        if (isset($aHRef["scheme"])) {
+            $sH .= $aHRef["scheme"].'://';
+        }
+        if (isset($aHRef["host"])) {
+            $sH .= $aHRef["host"];
+        }
+        if (isset($aHRef["user"])) {
+            $sH .= $aHRef["user"];
+        }
+        if (isset($aHRef["path"])) {
+            $sH .= $aHRef["path"];
+        }
     } else {
         $sH = $sHRef;
         if (isset($_GET) && count($_GET)) {
@@ -133,7 +155,9 @@ function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGet
     }
     if (isset($aGetvars) && count($aGetvars)) {
         foreach ($aGetvars as $sKey => $sValue) {
-            if (array_key_exists($sKey, $aGetvarstoadd)) continue;
+            if (array_key_exists($sKey, $aGetvarstoadd)) {
+                continue;
+            }
             if ($bFirstGetVar) {
                 $sH .= '?';
                 $bFirstGetVar = false;
@@ -147,7 +171,8 @@ function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGet
     return $sH;
 }
 
-function calculateImagesizeToBox($sImage, $iBoxWidth, $iBoxHeight) {
+function calculateImagesizeToBox($sImage, $iBoxWidth, $iBoxHeight)
+{
     $aImagedata = GetImageSize($sImage);
 
     if($aImagedata[0] > $iBoxWidth && $aImagedata[1] > $iBoxHeight) {
@@ -176,13 +201,17 @@ function calculateImagesizeToBox($sImage, $iBoxWidth, $iBoxHeight) {
         'newheight' => round($iHeight),
     );
 
-    if($aData["width"] != $aData["newwidth"]) $aData["resize"] = true;
-    else $aData["resize"] = false;
+    if($aData["width"] != $aData["newwidth"]) {
+        $aData["resize"] = true;
+    } else {
+        $aData["resize"] = false;
+    }
 
     return $aData;
 }
 
-function resizeImage($sImage, $sNewimage, $iNewwidth, $iNewheight, $sJPGquality = 75) {
+function resizeImage($sImage, $sNewimage, $iNewwidth, $iNewheight, $sJPGquality = 75)
+{
     global $PSS;
 
     $aImagedata = GetImageSize($sImage);
@@ -213,11 +242,13 @@ function resizeImage($sImage, $sNewimage, $iNewwidth, $iNewheight, $sJPGquality 
     return file_exists($sNewimage);
 }
 
-function usefulChars() {
+function usefulChars()
+{
     return '<br>Useful Chars: &oslash; &Oslash; &ntilde; &Ntilde;';
 }
 
-function getWherefound($C, $sIndexes) {
+function getWherefound($C, $sIndexes)
+{
     $sH = '';
     $aResults = array();
 
@@ -242,7 +273,8 @@ function getWherefound($C, $sIndexes) {
     return $sH;
 }
 
-function getWherefoundWalker($C, $sSearchstring) {
+function getWherefoundWalker($C, $sSearchstring)
+{
     foreach ($C["navstruct"] as $sKey => $mValue) {
         if (is_array($mValue)) {
             foreach ($mValue as $sKey1 => $mValue1) {
@@ -273,7 +305,8 @@ function getWherefoundWalker($C, $sSearchstring) {
     }
 }
 
-function dateAddLeadingZero($sDate) {
+function dateAddLeadingZero($sDate)
+{
     switch ($sDate) {
         case '0':
             return '01';
@@ -309,17 +342,20 @@ function dateAddLeadingZero($sDate) {
     return $sDate;
 }
 
-function rHTC($sS) {
+function rHTC($sS)
+{
     $sS = str_replace('"', '&quot;', $sS);
     return $sS;
 }
 
-function validateEmail($sEmail) {
+function validateEmail($sEmail)
+{
     if(preg_match('/^[^@]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$/', $sEmail)) return true;
     else return false;
 }
 
-function handleMail() {
+function handleMail()
+{
     global $C, $FORM;
     if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'send') {
         $sSubject = 'webpage-mail from '.$_REQUEST["name"];
@@ -354,7 +390,8 @@ function handleMail() {
     return $sH;
 }
 
-function array_search_recursive($needle, $haystack, $nodes=array()) {
+function array_search_recursive($needle, $haystack, $nodes=array())
+{
     foreach ($haystack as $key1=>$value1) {
         if (is_array($value1)) {
             $nodes = array_search_recursive($needle, $value1, $nodes);
@@ -365,7 +402,8 @@ function array_search_recursive($needle, $haystack, $nodes=array()) {
     return $nodes;
 }
 
-function debug($mixed, $bQuiet = false) {
+function debug($mixed, $bQuiet = false)
+{
     if (!$bQuiet) global $sDebug;
     if (!isset($sDebug)) $sDebug = '';
     $sDebug .= '<pre class="debug">';
@@ -377,7 +415,8 @@ function debug($mixed, $bQuiet = false) {
     return $sDebug;
 }
 
-function href($sLink = '', $aGetvars = array(), $sClass = '', $sEvents = '',  $sTarget = '') {
+function href($sLink = '', $aGetvars = array(), $sClass = '', $sEvents = '',  $sTarget = '')
+{
     $sH = '<a href="';
     $sH .= $sLink;
     if (count($aGetvars) > 0) {
@@ -406,7 +445,8 @@ function href($sLink = '', $aGetvars = array(), $sClass = '', $sEvents = '',  $s
     return $sH;
 }
 
-function showPagesnav($iPages, $iPage, $aGetvars = array()) {
+function showPagesnav($iPages, $iPage, $aGetvars = array())
+{
     $sH = '';
     // links: << <
     if ($iPage == 1) {
@@ -439,7 +479,8 @@ function showPagesnav($iPages, $iPage, $aGetvars = array()) {
     return $sH;
 }
 
-function buildInsertQuery($aData, $sTable, $bKeepAT = false) {
+function buildInsertQuery($aData, $sTable, $bKeepAT = false)
+{
     $sFields = '';
     $sValues = '';
     foreach ($aData as $sKey => $sValue) {
@@ -454,7 +495,8 @@ function buildInsertQuery($aData, $sTable, $bKeepAT = false) {
     return $sQ;
 }
 
-function buildPSInsertQuery($aData, $sTable) {
+function buildPSInsertQuery($aData, $sTable)
+{
     $sFields = '';
     $sValues = '';
     foreach ($aData as $sKey => $sValue) {
@@ -465,7 +507,8 @@ function buildPSInsertQuery($aData, $sTable) {
     return $sQ;
 }
 
-function buildUpdateQuery($aData, $sTable, $sPKey = '', $sPValue = '', $bKeepAT = false) {
+function buildUpdateQuery($aData, $sTable, $sPKey = '', $sPValue = '', $bKeepAT = false)
+{
     $sQ = "UPDATE ".$sTable." SET ";
     foreach ($aData as $sKey => $sValue) {
         $sQ .= $sKey." = '".cED($sValue, $bKeepAT)."', ";
@@ -479,10 +522,13 @@ function buildUpdateQuery($aData, $sTable, $sPKey = '', $sPValue = '', $bKeepAT 
     return $sQ;
 }
 
-function buildPSUpdateQuery($aData, $sTable, $sPKey = '') {
+function buildPSUpdateQuery($aData, $sTable, $sPKey = '')
+{
     $sQ = "UPDATE ".$sTable." SET ";
     foreach ($aData as $sKey => $sValue) {
-        if ($sPKey != '' && $sKey == $sPKey) continue;
+        if ($sPKey != '' && $sKey == $sPKey) {
+            continue;
+        }
         $sQ .= $sKey." = :".$sKey.", ";
     }
     $sQ = cutStringend($sQ, 2);
@@ -494,7 +540,8 @@ function buildPSUpdateQuery($aData, $sTable, $sPKey = '') {
     return $sQ;
 }
 
-function showClienttime() {
+function showClienttime()
+{
     $sH = '<script type="text/javascript">
     <!--
     var Jetzt = new Date();
@@ -511,14 +558,18 @@ function showClienttime() {
     return $sH;
 }
 
-function cED($sString, $bKeepAT = false) { // Cleanup External Data
+function cED($sString, $bKeepAT = false)
+{ // Cleanup External Data
     $sString = str_replace("'", "&#39;", $sString);
     //$sString = str_replace('"', "&#34;", $sString);
-    if (!$bKeepAT) $sString = str_replace("@", "&#064;", $sString);
+    if (!$bKeepAT) {
+        $sString = str_replace("@", "&#064;", $sString);
+    }
     return $sString;
 }
 
-function cEDA($aInput) { // Cleanup External Data Array (one dimensional)
+function cEDA($aInput)
+{ // Cleanup External Data Array (one dimensional)
     $aOutput = array();
     foreach ($aInput as $sKey => $sValue) {
         $aOutput[$sKey] = str_replace("'", "&#39;", $sValue);
@@ -527,7 +578,8 @@ function cEDA($aInput) { // Cleanup External Data Array (one dimensional)
     return $aOutput;
 }
 
-function cutString($string, $length="35") {
+function cutString($string, $length="35")
+{
     if(mb_strlen($string) > $length + 3) {
         $string = mb_substr($string, 0, $length);
         $string = trim($string)."...";
@@ -535,12 +587,14 @@ function cutString($string, $length="35") {
     return $string;
 }
 
-function cutStringend($sString, $iLength) {
+function cutStringend($sString, $iLength)
+{
     $sString = mb_substr($sString, 0, mb_strlen($sString) - $iLength);
     return $sString;
 }
 
-function makeCheckboxtable($sString1, $sString2, $sStyle = 'main') {
+function makeCheckboxtable($sString1, $sString2, $sStyle = 'main')
+{
     $sH = '<table valign="top">';
     $sH .= '<tr>';
     $sH .= '<td class="'.$sStyle.'">'.$sString1.'</td>';
@@ -551,7 +605,8 @@ function makeCheckboxtable($sString1, $sString2, $sStyle = 'main') {
     return $sH;
 }
 
-function getCheckbox($sKey, $sBoxvalue) {
+function getCheckbox($sKey, $sBoxvalue)
+{
     if(isset($_REQUEST[$sKey]) && $_REQUEST[$sKey] == $sBoxvalue) {
         return true;
     } else {
@@ -561,7 +616,8 @@ function getCheckbox($sKey, $sBoxvalue) {
 
 // Beispiel: $FORM->makeCheckbox('fil_status[A]', 'A', getCheckboxaval('fil_status', 'A'))
 // das array muss benannte schlüssel haben da sonst der erste (0) wie false behandelt wird!
-function getCheckboxaval($sKey, $sBoxvalue) {
+function getCheckboxaval($sKey, $sBoxvalue)
+{
     if(isset($_REQUEST[$sKey]) && array_search($sBoxvalue, $_REQUEST[$sKey])) {
         return true;
     } else {
@@ -570,13 +626,15 @@ function getCheckboxaval($sKey, $sBoxvalue) {
 }
 
 // Expects list of options, one option per line
-function makeOptionsArrayFromString($sString) {
+function makeOptionsArrayFromString($sString)
+{
     $sString = str_replace("\r", "", $sString);
     $aOptions = explode("\n", $sString);
     return $aOptions;
 }
 
-function getOptionname($aOptions, $sSelected) {
+function getOptionname($aOptions, $sSelected)
+{
     foreach ($aOptions as $sValue) {
         $aTMP = explode('|', $sValue);
         if ($aTMP[0] == $sSelected) {
@@ -585,7 +643,8 @@ function getOptionname($aOptions, $sSelected) {
     }
 }
 
-function getFormfield($sKey, $sDefault = '', $bEmptyisvalid = false) {
+function getFormfield($sKey, $sDefault = '', $bEmptyisvalid = false)
+{
     if(isset($_REQUEST[$sKey])) {
         if ($bEmptyisvalid && $_REQUEST[$sKey] == '') {
             return '';
@@ -599,7 +658,8 @@ function getFormfield($sKey, $sDefault = '', $bEmptyisvalid = false) {
     }
 }
 
-function makeListtable($aC, $aData) { // v 1.4
+function makeListtable($aC, $aData)
+{ // v 1.4
     /*
     Changes in 1.4 2014-06-13:
     changed: css to highlight rows
@@ -680,7 +740,9 @@ function makeListtable($aC, $aData) { // v 1.4
     $sH .= '</script>'."\n";
     if (is_array($aC)) {
         $iTotalwidth = 0;
-        foreach ($aC as $iValue) $iTotalwidth += $iValue["width"];
+        foreach ($aC as $iValue) {
+            $iTotalwidth += $iValue["width"];
+        }
         $sH .= '<div style="text-align:right;width:'.$iTotalwidth.'px"><a href="?action=add">'.T("misc_add_new_value").'</a></div>';
         $sH .= '<table class="listtable">';
 
@@ -717,8 +779,11 @@ function makeListtable($aC, $aData) { // v 1.4
                 }
                 $sH .= '>';
                 if (!$aCValue["linked"]) {
-                    if (isset($aCValue["escapehtmlspecialchars"]) && $aCValue["escapehtmlspecialchars"] == true) $sH .= htmlspecialchars($aValue[$aCValue["key"]]);
-                    else $sH .= $aValue[$aCValue["key"]];
+                    if (isset($aCValue["escapehtmlspecialchars"]) && $aCValue["escapehtmlspecialchars"] == true) {
+                        $sH .= htmlspecialchars($aValue[$aCValue["key"]]);
+                    } else {
+                        $sH .= $aValue[$aCValue["key"]];
+                    }
                 } else {
                     $sH .= '<a href="'.$aCValue["ltarget"].'?'.$aCValue["lkeyname"].'='.$aValue[$aCValue["key"]];
                     if (isset($aCValue["lgetvars"])) {
@@ -747,5 +812,3 @@ function makeListtable($aC, $aData) { // v 1.4
     }
     return $sH;
 }
-
-?>
