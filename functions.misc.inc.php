@@ -2,7 +2,7 @@
 
 /*
 2014-07-23
-- added possibility to ad a label to debug()
+- added possibility to add a label to debug()
 2014-07-15
 - Changed code formating to comply with php-fig.org's PSR
 2014-07-14
