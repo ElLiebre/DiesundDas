@@ -1,6 +1,8 @@
 <?php
 
 /*
+2014-07-23
+- added possibility to ad a label to debug()
 2014-07-15
 - Changed code formating to comply with php-fig.org's PSR
 2014-07-14
@@ -402,11 +404,14 @@ function array_search_recursive($needle, $haystack, $nodes=array())
     return $nodes;
 }
 
-function debug($mixed, $bQuiet = false)
+function debug($mixed, $bQuiet = false, $sLabel = '')
 {
     if (!$bQuiet) global $sDebug;
     if (!isset($sDebug)) $sDebug = '';
     $sDebug .= '<pre class="debug">';
+    if ($sLabel != '') {
+        $sDebug .= $sLabel."\n\n";
+    }
     ob_start();
     print_r($mixed);
     $sDebug .= htmlspecialchars(ob_get_contents());
