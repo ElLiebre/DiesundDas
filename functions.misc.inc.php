@@ -1,6 +1,8 @@
 <?php
 
 /*
+2014-07-27
+- removed add line link in makeListtable()
 2014-07-23
 - added possibility to add a label to debug()
 2014-07-15
@@ -744,11 +746,6 @@ function makeListtable($aC, $aData)
     $sH .= '}'."\n";
     $sH .= '</script>'."\n";
     if (is_array($aC)) {
-        $iTotalwidth = 0;
-        foreach ($aC as $iValue) {
-            $iTotalwidth += $iValue["width"];
-        }
-        $sH .= '<div style="text-align:right;width:'.$iTotalwidth.'px"><a href="?action=add">'.T("misc_add_new_value").'</a></div>';
         $sH .= '<table class="listtable">';
 
         // Begin table head
