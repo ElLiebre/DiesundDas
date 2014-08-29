@@ -1,6 +1,9 @@
 <?php
 
 /*
+2014-08-19
+- Added -f parameter to mail_utf8() sending for sender address
+- Added display of seconds to showClienttime()
 2014-07-27
 - removed add line link in makeListtable()
 2014-07-23
@@ -63,7 +66,7 @@ function mail_utf8($to, $from_user, $from_email, $subject = '(No subject)', $mes
     "MIME-Version: 1.0" . "\r\n" .
     "Content-type: ".$sType."; charset=UTF-8" . "\r\n";
 
-    return mail($to, $subject, $message, $headers);
+    return mail($to, $subject, $message, $headers, '-f'.$from_email);
 }
 
 function T($sTextkey, $bReturnFalseIfNotAvailable = false)
@@ -557,9 +560,11 @@ function showClienttime()
     var Jahr = Jetzt.getYear();
     var Stunden = Jetzt.getHours();
     var Minuten = Jetzt.getMinutes();
-    var NachVoll  = ((Minuten < 10) ? ":0" : ":");
+    var Sekunden = Jetzt.getSeconds();
+    var NachVollMinuten  = ((Minuten < 10) ? ":0" : ":");
+    var NachVollSekunden  = ((Sekunden < 10) ? ":0" : ":");
     if (Jahr<2000) Jahr=Jahr+1900;
-    document.write(Tag + "." + Monat + "." + Jahr + "  " + Stunden + NachVoll + Minuten);
+    document.write(Tag + "." + Monat + "." + Jahr + "  " + Stunden + NachVollMinuten + Minuten + NachVollSekunden + Sekunden);
     //-->
     </script>';
     return $sH;
