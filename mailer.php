@@ -114,8 +114,16 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
         }
         ?>
     </select><br>
-    <textarea name="mailcontent" rows="40" cols="120"><?php echo getFormfield('mailcontent'); ?></textarea>
+    <textarea name="mailcontent" rows="40" cols="120"><?php
+        $sMailcontent = getFormfield('mailcontent');
+        if (isset($_POST["preservenbsp"]) && $_POST["preservenbsp"] == "yes") {
+            $sMailcontent = mb_ereg_replace('&nbsp;', '&amp;nbsp;', $sMailcontent);
+        }
+        echo $sMailcontent;
+        ?></textarea>
     <input type="hidden" name="action" value="send">
+    <br>
+    <input type="checkbox" name="preservenbsp" id="preservenbsp" value="yes"<?php echo (getCheckbox('preservenbsp', 'yes') ? ' checked' : '') ?>><label for="preservenbsp">Preserve &amp;nbsp;</label>
     <br>
     <input type="submit" value="Send">
 </form>
