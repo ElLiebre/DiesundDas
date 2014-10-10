@@ -3,6 +3,7 @@
 /*
 2014-10-10
 - changed function debug() to use var_dump instead of print_r
+- removed function usefulChars(), getWherefound(), getWherefoundWalker(), rHTC(), handleMail(), href()
 2014-10-02
 - added parameter $bMakeAmpersandHTMLEntity to makeLinkHRefWithAddedGetVars()
 2014-08-19
@@ -261,69 +262,6 @@ function resizeImage($sImage, $sNewimage, $iNewwidth, $iNewheight, $sJPGquality 
     return file_exists($sNewimage);
 }
 
-function usefulChars()
-{
-    return '<br>Useful Chars: &oslash; &Oslash; &ntilde; &Ntilde;';
-}
-
-function getWherefound($C, $sIndexes)
-{
-    $sH = '';
-    $aResults = array();
-
-    $sErg = preg_replace("/\s?/", "", $sIndexes);
-    $aErg = preg_split('/([AEG]\d*)/', $sErg, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
-
-    foreach ($aErg as $sAIDX) {
-        if (isset($C["raidx"][$sAIDX] )) {
-            $aResults[] = getWherefoundWalker($C, $C["raidx"][$sAIDX]);
-        }
-    }
-    //debug($aResults);
-    if (count($aResults) > 0) {
-        $sH .= 'Sie finden diesen Artikel in den folgenden Sektionen unserer Website:<br>';
-    }
-    foreach ($aResults as $aValue) {
-        foreach ($aValue as $sKey => $sValue) {
-            $sH .= '<a href="'.$sValue.'">'.$sKey.'</a> &gt; ';
-        }
-        $sH = cutStringend($sH , 6).'<br>';
-    }
-    return $sH;
-}
-
-function getWherefoundWalker($C, $sSearchstring)
-{
-    foreach ($C["navstruct"] as $sKey => $mValue) {
-        if (is_array($mValue)) {
-            foreach ($mValue as $sKey1 => $mValue1) {
-                if (is_array($mValue1)) {
-                    foreach ($mValue1 as $sKey2 => $mValue2) {
-                        if ($mValue2 == $sSearchstring) {
-                            $aV1 = $C["navstruct"][$sKey][$sKey1];
-                            $sK1 = key($aV1);
-                            $sV1 = current($aV1);
-                            $aV0 = $C["navstruct"][$sKey];
-                            $sK0 = key($aV0);
-                            $sV0 = current($aV0);
-                            $aResult = array($sK0 => $sV0, $sK1 => $sV1, $sKey2 => $mValue2);
-                            return $aResult;
-                        }
-                    }
-                } else {
-                    if ($mValue1 == $sSearchstring) {
-                        $aV0 = $C["navstruct"][$sKey];
-                        $sK0 = key($aV0);
-                        $sV0 = current($aV0);
-                        $aResult = array($sK0 => $sV0, $sKey1 => $mValue1);
-                        return $aResult;
-                    }
-                }
-            }
-        }
-    }
-}
-
 function dateAddLeadingZero($sDate)
 {
     switch ($sDate) {
@@ -361,52 +299,10 @@ function dateAddLeadingZero($sDate)
     return $sDate;
 }
 
-function rHTC($sS)
-{
-    $sS = str_replace('"', '&quot;', $sS);
-    return $sS;
-}
-
 function validateEmail($sEmail)
 {
     if(preg_match('/^[^@]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$/', $sEmail)) return true;
     else return false;
-}
-
-function handleMail()
-{
-    global $C, $FORM;
-    if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'send') {
-        $sSubject = 'webpage-mail from '.$_REQUEST["name"];
-        $sHeader = 'Reply-To: '.$_REQUEST["email"]."\r\n".'From: '.$_REQUEST["email"]."\r\n";
-        $sMessage = 'Name: '.$_REQUEST["name"]."\n\n".$_REQUEST["message"];
-        if (mail($C["mailtargets"][$_REQUEST["mailto"]], $sSubject, $sMessage, $sHeader)) {
-            $sH = T("mail_success").'<br>';
-        } else {
-            $sH = T("mail_failure").'<br>';
-        }
-    } else {
-        foreach ($C["mailtargets"] as $iKey => $sValue) {
-            $aTargets_select[] = $iKey.'|'.$sValue;
-        }
-        $sH = '';
-        $sH .= T("mail_formhead").'<br><br>';
-        $sH .= $FORM->openForm();
-        $sH .= $FORM->makeHidden('action', 'send');
-        $sH .= T("mail_formtarget");
-        $sH .= '<br>';
-        $sH .= $FORM->makeSelect('mailto', $aTargets_select, '', 380);
-        $sH .= '<br><br>';
-        $sH .= T("mail_formsendername").'<br>';
-        $sH .= $FORM->makeText('name', '', 380).'<br><br>';
-        $sH .= T("mail_formsendermail").'<br>';
-        $sH .= $FORM->makeText('email', '', 380).'<br><br>';
-        $sH .= T("mail_formmessage").'<br>';
-        $sH .= $FORM->makeTextarea('message', '', 380, 140).'<br>';
-        $sH .= $FORM->makeSubmit('', T("mail_formsubmit"), 380);'';
-        $sH .= $FORM->closeForm();
-    }
-    return $sH;
 }
 
 function array_search_recursive($needle, $haystack, $nodes=array())
@@ -435,36 +331,6 @@ function debug($mixed, $bQuiet = false, $sLabel = '')
     ob_end_clean();
     $sDebug .= '</pre>';
     return $sDebug;
-}
-
-function href($sLink = '', $aGetvars = array(), $sClass = '', $sEvents = '',  $sTarget = '')
-{
-    $sH = '<a href="';
-    $sH .= $sLink;
-    if (count($aGetvars) > 0) {
-        $bFirst = true;
-        foreach ($aGetvars as $sKey => $sValue) {
-            if ($bFirst) {
-                $sH .= '?';
-                $bFirst = false;
-            } else {
-                $sH .= '&';
-            }
-            $sH .= $sKey.'='.$sValue;
-        }
-    }
-    $sH .= '"';
-    if ($sClass != '') {
-        $sH .= ' class="'.$sClass.'"';
-    }
-    if ($sEvents != '') {
-        $sH .= ' '.$sEvents;
-    }
-    if ($sTarget != '') {
-        $sH .= ' target="'.$sTarget.'"';
-    }
-    $sH .= '>';
-    return $sH;
 }
 
 function showPagesnav($iPages, $iPage, $aGetvars = array())
