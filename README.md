@@ -11,3 +11,6 @@ functions.dba.inc.php
 
 class.form.inc.php
 - eine Klasse um HTML Formulare zusammenzubauen
+
+mailer.php
+- ein tool zum testen von html e-mails
