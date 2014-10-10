@@ -1,6 +1,10 @@
 <?php
 
 /*
+2014-10-10
+- changed function debug() to use var_dump instead of print_r
+2014-10-02
+- added parameter $bMakeAmpersandHTMLEntity to makeLinkHRefWithAddedGetVars()
 2014-08-19
 - Added -f parameter to mail_utf8() sending for sender address
 - Added display of seconds to showClienttime()
@@ -116,7 +120,7 @@ function loadTextcats()
     }
 }
 
-function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGetVarsFromSuppliedHRef = false)
+function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGetVarsFromSuppliedHRef = false, $bMakeAmpersandHTMLEntity = true)
 {
     if ($bUseGetVarsFromSuppliedHRef) {
         $aHRef = parse_url($sHRef);
@@ -155,7 +159,11 @@ function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGet
                 $sH .= '?';
                 $bFirstGetVar = false;
             } else {
-                $sH .= '&amp;';
+                if ($bMakeAmpersandHTMLEntity) {
+                    $sH .= '&amp;';
+                } else {
+                    $sH .= '&';
+                }
             }
             $sH .= $sKey.'='.$sValue;
         }
@@ -169,7 +177,11 @@ function makeLinkHRefWithAddedGetVars($sHRef, $aGetvarstoadd = array(), $bUseGet
                 $sH .= '?';
                 $bFirstGetVar = false;
             } else {
-                $sH .= '&amp;';
+                if ($bMakeAmpersandHTMLEntity) {
+                    $sH .= '&amp;';
+                } else {
+                    $sH .= '&';
+                }
             }
             $sH .= $sKey.'='.$sValue;
         }
@@ -418,7 +430,7 @@ function debug($mixed, $bQuiet = false, $sLabel = '')
         $sDebug .= $sLabel."\n\n";
     }
     ob_start();
-    print_r($mixed);
+    var_dump($mixed);
     $sDebug .= htmlspecialchars(ob_get_contents());
     ob_end_clean();
     $sDebug .= '</pre>';
