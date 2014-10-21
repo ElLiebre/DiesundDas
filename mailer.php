@@ -16,6 +16,7 @@ $C = array(
     'mail_to' => array(
         /*
          either one email address per row or an array containing one email address per row
+         a not valid email address will be used as a headline (disabled option)
         eg:
         'mail@john.doe',
         array(
@@ -43,6 +44,10 @@ $C = array(
 <style type="text/css">
     body{
         background: #cfcfcf;
+    }
+    select option:disabled{
+        background: #cfcfcf;
+        color: #000;
     }
 </style>
 <?php
@@ -104,7 +109,7 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
     <select name="recipient">
         <?php
         foreach ($C["mail_to"] as $sKey => $mValue) {
-            echo '<option value="'.$sKey.'"'.($_POST["recipient"] == $sKey ? ' selected' : '').'>';
+            echo '<option value="'.$sKey.'"'.($_POST["recipient"] == $sKey ? ' selected' : '').(is_array($mValue) || validateEmail($mValue) ? '' : ' disabled').'>';
             if (is_array($mValue)) {
                 echo implode(', ', $mValue);
             } else {
