@@ -3,6 +3,7 @@
 /*
 Dependencies:
 PHPMailer, functions.misc.inc.php - see github.com/elliebre Repo: DiesundDas
+Optional: premailer installed on webserver, see: https://github.com/premailer/premailer
 */
 
 ini_set('display_errors', 0);
@@ -30,8 +31,10 @@ $C = array(
     'mail_from_email' => 'mail@haase-it.com',
     'mail_subject' => 'HTML Testmail - '.date("Y-m-d H:i:s"),
     'log_mails' => true,
+    'premailer_enable' => false,
+    'premailer_executable' => 'premailer',
+    'premailer_generate_plaintext' => false,
 );
-
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -58,43 +61,52 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
     } else {
         $mMailto = $C["mail_to"][0];
     }
-    if (1 == 1) {
-        $mail = new PHPMailer;
-        $mail->CharSet = 'UTF-8';
 
-        $mail->isSendmail();
+    $mail = new PHPMailer;
+    $mail->CharSet = 'UTF-8';
 
-        $mail->From = $C["mail_from_email"];
-        $mail->FromName = $C["mail_from_user"];
-        if (is_array($mMailto)) {
-            foreach ($mMailto as $sMailto) {
-                $mail->addAddress($sMailto);
-            }
-        } else {
-            $mail->addAddress($mMailto);
-        }
+    $mail->isSendmail();
 
-        $mail->isHTML(true);
-
-        $mail->Subject = $C["mail_subject"] . ' ' . $sRandomstring;
-        $mail->Body = $_POST["mailcontent"];
-        //$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
-
-        if (!$mail->send()) {
-            echo 'Message could not be sent.';
-            echo 'Mailer Error: ' . $mail->ErrorInfo;
-        } else {
-            echo 'Mail versandt: ' . showClienttime() . '<br>An: ';
-            if (is_array($C["mail_to"][$_POST["recipient"]])) {
-                echo implode(', ', $C["mail_to"][$_POST["recipient"]]);
-            } else {
-                echo $C["mail_to"][$_POST["recipient"]];
-            }
-            echo '<br>ID: ' . $sRandomstring;
+    $mail->From = $C["mail_from_email"];
+    $mail->FromName = $C["mail_from_user"];
+    if (is_array($mMailto)) {
+        foreach ($mMailto as $sMailto) {
+            $mail->addAddress($sMailto);
         }
     } else {
-        mail_utf8($mMailto, $C["mail_from_user"], $C["mail_from_email"], $C["mail_subject"] . ' ' . $sRandomstring, $_POST["mailcontent"]);
-        echo 'Mail versandt: ' . showClienttime() . '<br>An: ' . $C["mail_to"][$_POST["recipient"]] . '<br>ID: ' . $sRandomstring;
+        $mail->addAddress($mMailto);
+    }
+
+    $mail->isHTML(true);
+
+    $mail->Subject = $C["mail_subject"] . ' ' . $sRandomstring;
+
+    $sMailcontenthtml = $_POST["mailcontent"];
+    $sMailcontenttext = '';
+
+    if (isset($C["premailer_enable"]) && $C["premailer_enable"] && isset($_POST["usepremailer"]) && $_POST["usepremailer"] == 'yes') {
+        $foo = exec('echo "'.str_replace('"', '\"', $sMailcontenthtml).'" | '.$C["premailer_executable"].' -r', $aMailcontenthtml);
+        $sMailcontenthtml = implode("\n", $aMailcontenthtml);
+        if (isset($C["premailer_generate_plaintext"]) && $C["premailer_generate_plaintext"]) {
+            $foo = exec('echo "'.str_replace('"', '\"', $sMailcontenthtml).'" | premailer -r --mode txt', $aMailcontenttext);
+            $sMailcontenttext = implode("\n", $aMailcontenttext);
+        }
+    }
+
+    $mail->Body = $sMailcontenthtml;
+    if (isset($C["premailer_generate_plaintext"]) && $C["premailer_generate_plaintext"] && $sMailcontenttext != '') $mail->AltBody = $sMailcontenttext;
+
+    if (!$mail->send()) {
+        echo 'Message could not be sent.';
+        echo 'Mailer Error: ' . $mail->ErrorInfo;
+    } else {
+        echo 'Mail versandt: ' . showClienttime() . '<br>An: ';
+        if (is_array($C["mail_to"][$_POST["recipient"]])) {
+            echo implode(', ', $C["mail_to"][$_POST["recipient"]]);
+        } else {
+            echo $C["mail_to"][$_POST["recipient"]];
+        }
+        echo '<br>ID: ' . $sRandomstring;
     }
 
     if (!is_blank($C["log_mails"]) && $C["log_mails"]) {
@@ -129,6 +141,10 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
     <input type="hidden" name="action" value="send">
     <br>
     <input type="checkbox" name="preservenbsp" id="preservenbsp" value="yes"<?php echo (getCheckbox('preservenbsp', 'yes') ? ' checked' : '') ?>><label for="preservenbsp">Preserve &amp;nbsp;</label>
+    <?php if (isset($C["premailer_enable"]) && $C["premailer_enable"]) { ?>
+        <br>
+        <input type="checkbox" name="usepremailer" id="usepremailer" value="yes"<?php echo (getCheckbox('usepremailer', 'yes') ? ' checked' : '') ?>><label for="usepremailer">Use Premailer (-r)</label>
+    <?php } ?>
     <br>
     <input type="submit" value="Send">
 </form>
