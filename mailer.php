@@ -35,6 +35,26 @@ $C = array(
     'premailer_executable' => 'premailer',
     'premailer_generate_plaintext' => false,
 );
+// Check for available attachment images for embedding
+$hDirEmbImgAttachments = opendir('./'.ATTACHMENT_DIRECTORY.'/'.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.'/');
+$bEmbImgAttachmentsExist = false;
+if ($hDirEmbImgAttachments) {
+    while($sDirentry = readdir($hDirEmbImgAttachments)) {
+        if ($sDirentry[0] == '.') continue; // no hidden files
+        elseif (@is_dir('./'.ATTACHMENT_DIRECTORY.'/'.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.'/'.$sDirentry)) {
+            continue;
+        } else {
+            $TMP["file"] = @GetImageSize('./'.ATTACHMENT_DIRECTORY.'/'.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.'/'.$sDirentry);
+            if ($TMP["file"][2] == 1 || $TMP["file"][2] == 2 || $TMP["file"][2] == 3) {
+                $aDirentry = pathinfo($sDirentry);
+                $sEmbImgAttachments[$aDirentry["filename"]] = $aDirentry["basename"];
+                $bEmbImgAttachmentsExist = true;
+            } // endif is this a gif/jpeg/png?
+        }
+    } // endwhile
+    unset($sDirentry);
+    closedir($hDirEmbImgAttachments);
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -52,6 +72,7 @@ $C = array(
         background: #cfcfcf;
         color: #000;
     }
+    #embedimage{width: 800px;}
 </style>
 <?php
 if (isset($_POST["action"]) && $_POST["action"] == 'send') {
@@ -78,6 +99,14 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
     }
 
     $mail->isHTML(true);
+
+    if ($bEmbImgAttachmentsExist && isset($_REQUEST["EmbImg"]) && is_array($_REQUEST["EmbImg"])) {
+        foreach ($_REQUEST["EmbImg"] as $sValue) {
+            if (isset($sEmbImgAttachments[$sValue])) {
+                $mail->AddEmbeddedImage('./' . ATTACHMENT_DIRECTORY . '/' . ATTACHMENT_DIRECTORY_EMBEDDEDIMG . '/' . $sEmbImgAttachments[$sValue], $sValue);
+            }
+        }
+    }
 
     $mail->Subject = $C["mail_subject"] . ' ' . $sRandomstring;
 
@@ -121,7 +150,7 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
     <select name="recipient">
         <?php
         foreach ($C["mail_to"] as $sKey => $mValue) {
-            echo '<option value="'.$sKey.'"'.($_POST["recipient"] == $sKey ? ' selected' : '').(is_array($mValue) || validateEmail($mValue) ? '' : ' disabled').'>';
+            echo '<option value="'.$sKey.'"'.(isset($_POST["recipient"]) && $_POST["recipient"] == $sKey ? ' selected' : '').(is_array($mValue) || validateEmail($mValue) ? '' : ' disabled').'>';
             if (is_array($mValue)) {
                 echo implode(', ', $mValue);
             } else {
@@ -144,10 +173,29 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
     <?php if (isset($C["premailer_enable"]) && $C["premailer_enable"]) { ?>
         <br>
         <input type="checkbox" name="usepremailer" id="usepremailer" value="yes"<?php echo (getCheckbox('usepremailer', 'yes') ? ' checked' : '') ?>><label for="usepremailer">Use Premailer (-r)</label>
-    <?php } ?>
+    <?php
+    }
+    if ($bEmbImgAttachmentsExist) {
+        echo '<br><label for="embedimage">Embed these images:</label><br>';
+        $iSelectSize = count($sEmbImgAttachments);
+        if ($iSelectSize > 5) $iSelectSize = 5;
+        echo '<select name="EmbImg[]" id="embedimage" size="'.$iSelectSize.'" multiple="multiple">';
+        foreach ($sEmbImgAttachments as $sKey => $sValue) {
+            echo '<option value="'.$sKey.'"';
+            if (isset($_REQUEST["EmbImg"]) && in_array($sKey, $_REQUEST["EmbImg"])) echo ' selected';
+            echo '>'.$sValue.' - available as: ';
+            echo '&lt;img src="cid:'.$sKey.'">';
+            echo '</option>';
+        }
+        echo '</select>';
+    }
+    ?>
     <br>
     <input type="submit" value="Send">
 </form>
+<?php
+//echo debug($_REQUEST);
+?>
 <br>
 <?php if (!is_blank($C["log_mails"]) && $C["log_mails"]) { ?><a href="log/" target="_blank">Log des Mailversands</a><?php } ?>
 </body>
