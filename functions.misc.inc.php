@@ -1,6 +1,9 @@
 <?php
 
 /*
+2014-11-19
+- removed function is_blank(), it was instancing the variable to test, this had some strange effects
+- removed function mail_utf8(), obsolete, use phpmailer library instead
 2014-10-10
 - changed function debug() to use var_dump instead of print_r
 - removed function usefulChars(), getWherefound(), getWherefoundWalker(), rHTC(), handleMail(), href()
@@ -38,20 +41,6 @@
 - added usefulChars()
 */
 
-/**
-* Checks if a scalar value is FALSE, without content or only full 
-* whitespaces. 
-* For non-scalar values will evaluate if value is empty().
-*
-* @param    mixed    $v    to test
-* @return    bool    if $v is blank
-* by FBOES
-*/
-function is_blank (&$v)
-{
-    return !isset($v) || (is_scalar($v) ? (trim($v) === '') : empty($v));
-}
-
 function generateRandomString($length = 10)
 {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -60,18 +49,6 @@ function generateRandomString($length = 10)
         $randomString .= $characters[rand(0, strlen($characters) - 1)];
     }
     return $randomString;
-}
-
-function mail_utf8($to, $from_user, $from_email, $subject = '(No subject)', $message = '', $sType = 'text/html')
-{
-    $from_user = "=?UTF-8?B?".base64_encode($from_user)."?=";
-    $subject = "=?UTF-8?B?".base64_encode($subject)."?=";
-
-    $headers = "From: $from_user <$from_email>\r\n".
-    "MIME-Version: 1.0" . "\r\n" .
-    "Content-type: ".$sType."; charset=UTF-8" . "\r\n";
-
-    return mail($to, $subject, $message, $headers, '-f'.$from_email);
 }
 
 function T($sTextkey, $bReturnFalseIfNotAvailable = false)
@@ -232,8 +209,6 @@ function calculateImagesizeToBox($sImage, $iBoxWidth, $iBoxHeight)
 
 function resizeImage($sImage, $sNewimage, $iNewwidth, $iNewheight, $sJPGquality = 75)
 {
-    global $PSS;
-
     $aImagedata = GetImageSize($sImage);
 
     if ($aImagedata[2] == 1) { // gif
