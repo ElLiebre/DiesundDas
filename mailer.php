@@ -13,6 +13,9 @@ date_default_timezone_set("Europe/Berlin");
 include_once('phpmailer/PHPMailerAutoload.php');
 include_once('functions.misc.inc.php');
 
+define("ATTACHMENT_DIRECTORY", 'attachments/');
+define("ATTACHMENT_DIRECTORY_EMBEDDEDIMG", 'img/');
+
 $C = array(
     'mail_to' => array(
         /*
@@ -35,16 +38,17 @@ $C = array(
     'premailer_executable' => 'premailer',
     'premailer_generate_plaintext' => false,
 );
+
 // Check for available attachment images for embedding
-$hDirEmbImgAttachments = opendir('./'.ATTACHMENT_DIRECTORY.'/'.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.'/');
+$hDirEmbImgAttachments = opendir('./'.ATTACHMENT_DIRECTORY.ATTACHMENT_DIRECTORY_EMBEDDEDIMG);
 $bEmbImgAttachmentsExist = false;
 if ($hDirEmbImgAttachments) {
     while($sDirentry = readdir($hDirEmbImgAttachments)) {
         if ($sDirentry[0] == '.') continue; // no hidden files
-        elseif (@is_dir('./'.ATTACHMENT_DIRECTORY.'/'.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.'/'.$sDirentry)) {
+        elseif (@is_dir('./'.ATTACHMENT_DIRECTORY.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.$sDirentry)) {
             continue;
         } else {
-            $TMP["file"] = @GetImageSize('./'.ATTACHMENT_DIRECTORY.'/'.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.'/'.$sDirentry);
+            $TMP["file"] = @GetImageSize('./'.ATTACHMENT_DIRECTORY.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.$sDirentry);
             if ($TMP["file"][2] == 1 || $TMP["file"][2] == 2 || $TMP["file"][2] == 3) {
                 $aDirentry = pathinfo($sDirentry);
                 $sEmbImgAttachments[$aDirentry["filename"]] = $aDirentry["basename"];
@@ -103,7 +107,7 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
     if ($bEmbImgAttachmentsExist && isset($_REQUEST["EmbImg"]) && is_array($_REQUEST["EmbImg"])) {
         foreach ($_REQUEST["EmbImg"] as $sValue) {
             if (isset($sEmbImgAttachments[$sValue])) {
-                $mail->AddEmbeddedImage('./' . ATTACHMENT_DIRECTORY . '/' . ATTACHMENT_DIRECTORY_EMBEDDEDIMG . '/' . $sEmbImgAttachments[$sValue], $sValue);
+                $mail->AddEmbeddedImage('./'.ATTACHMENT_DIRECTORY.ATTACHMENT_DIRECTORY_EMBEDDEDIMG.$sEmbImgAttachments[$sValue], $sValue);
             }
         }
     }
@@ -138,7 +142,7 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
         echo '<br>ID: ' . $sRandomstring;
     }
 
-    if (!is_blank($C["log_mails"]) && $C["log_mails"]) {
+    if (isset($C["log_mails"]) && $C["log_mails"]) {
         // write to file
         $fp = fopen('./log/' . date("Y-m-d-H-i-s") . '-' . $sRandomstring . '.html', 'a');
         fwrite($fp, $_POST["mailcontent"]);
@@ -193,9 +197,6 @@ if (isset($_POST["action"]) && $_POST["action"] == 'send') {
     <br>
     <input type="submit" value="Send">
 </form>
-<?php
-//echo debug($_REQUEST);
-?>
 <br>
-<?php if (!is_blank($C["log_mails"]) && $C["log_mails"]) { ?><a href="log/" target="_blank">Log des Mailversands</a><?php } ?>
+<?php if (isset($C["log_mails"]) && $C["log_mails"]) { ?><a href="log/" target="_blank">Log des Mailversands</a><?php } ?>
 </body>
